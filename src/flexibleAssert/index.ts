@@ -1,6 +1,8 @@
-export type AssertTypeError = string | Error | [string, string]
+type AssertTypeError = string | Error | [string, string]
 
-
+/**
+ * Assertion error class which can have extra details
+ */
 export class AssertionFailed extends Error {
     public constructor(message?: string, public readonly details?: string) {
         super(message);
@@ -20,7 +22,7 @@ export default class Assert {
      * @param errorParameter - Optional custom error or message to have on fail
      */
     public static equal(actual: any, expected: any, errorParameter?: AssertTypeError): void {
-        if (typeof actual === 'object' && deepCompare(actual, expected)) {
+        if (typeof actual === 'object' && typeof expected === 'object' && deepCompare(actual, expected)) {
             return;
         } else if (actual == expected) {
             return;
@@ -28,7 +30,6 @@ export default class Assert {
 
         throw this.generateError(errorParameter);
     }
-
 
     /**
      * Strict equal comparison.
@@ -39,7 +40,7 @@ export default class Assert {
      * @param errorParameter - Optional custom error or message to have on fail
      */
     public static strictEqual(actual: any, expected: any, errorParameter?: AssertTypeError): void {
-       if (actual === expected) {
+        if (actual === expected) {
             return;
         }
 
@@ -98,6 +99,16 @@ export default class Assert {
 }
 
 const deepCompare = function(obj1: any, obj2: any): boolean {
+    // null comparison for both objects
+    if (!obj1 || !obj2) {
+        // if one of them is not defined, check if both of them are not, else fail
+        if (!(!obj1 && !obj2)) {
+            return false;
+        }
+    }
+
+    // deep comparison for both classes
+    // source: https://stackoverflow.com/a/201265/4330018
     for (const i in obj1) {
         if (obj1.hasOwnProperty(i)) {
             if (!obj2.hasOwnProperty(i)) {
