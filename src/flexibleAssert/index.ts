@@ -1,4 +1,4 @@
-type AssertTypeError = string | Error | [string, string]
+type AssertTypeError = string | Error | [string, string] | Function
 
 /**
  * Assertion error class which can have extra details
@@ -78,6 +78,14 @@ export default class Assert {
             // Check if it's a tuple
             if (errorParameter instanceof Array) {
                 return new AssertionFailed(errorParameter[0], errorParameter[1]);
+            }
+            if(errorParameter instanceof Function){
+                const error = errorParameter();
+                if(error instanceof Error){
+                    throw error;
+                } else {
+                    console.error("Object is not of type error", error);
+                }
             }
         }
         return new AssertionFailed();
