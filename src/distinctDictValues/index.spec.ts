@@ -1,80 +1,50 @@
-import { from, Observable } from 'rxjs';
-import { filter, map, pairwise, startWith } from 'rxjs/operators';
+import { from } from 'rxjs';
+import distinctDictValues from './index';
+import Assert from '../flexibleAssert';
 
-// type arrayType = { a: number, b?: number };
+describe('Distinct values pipe function', () => {
+    it('Should return expected result', () => {
+        const expectedResult = [['a', 1], ['b', 2], ['a', 3]];
+        const result = [];
 
-describe('Pipe Playground', () => {
-    it('Should play', () => {
-        from([
+        const obs = from([
             { a: 1 },
             { a: 1, b: 2 },
             { a: 3, b: 2 },
             { a: 3, b: 2 }
         ])
-            // .pipe(distictDictValues(/* compareFn? */))
-            .subscribe(console.log);
-        // output: ['a', 1], ['b', 2], ['a', 3]
-
-    });
-
-    it('should work with sample', () => {
-        from([
-            1, 2, 3, 4
-        ]).pipe(pairwise(), map(([a, b]) => (a + 1))).subscribe(console.log);
-    });
-
-    it('Should work nested', () => {
-        from([
-            { a: 1 },
-            { a: 1, b: 2 },
-            { a: 3, b: 2 },
-            { a: 3, b: 2 }
-        ])
-            .pipe(
-                distinctDictValues())
-            .subscribe(j => console.log(j));
-
-    });
-});
-
-const getDiffer = (obj1: any, obj2: any) => {
-    let newObj: any[] = [];
-    if (!obj1) {
-        for (let keys in obj2) {
-            newObj[keys] = obj2[keys];
-        }
-    } else {
-        for (let keys in obj2) {
-            if (obj1[keys] != obj2[keys]) {
-                newObj[keys] = obj2[keys];
-            }
-        }
-    }
-
-    return newObj;
-};
-
-function distinctDictValues() {
-    return function <T>(source: Observable<T>): Observable<T[]> {
-        return new Observable<T[]>(subscriber => {
-            let previous: T;
-            const subscription = source.subscribe({
-                next(val) {
-                    const values = getDiffer(previous, val);
-                    previous = val;
-                    if (Object.keys(values).length > 0) {
-                        subscriber.next(values);
-                    }
-                },
-                error(error) {
-                    subscriber.error(error);
-                },
-                complete() {
-                    subscriber.complete();
-                }
+            .pipe(distinctDictValues())
+            .subscribe(c => {
+                result.push(c);
             });
 
-            return () => subscription.unsubscribe();
-        });
-    };
-}
+        obs.unsubscribe();
+        Assert.equal(expectedResult, result);
+    });
+
+    it('Should return expected result from own compare fn', () => {
+        const ownCompare = <T>(previous: T | undefined, current: T): T[] => {
+            if (previous && JSON.stringify(previous) != JSON.stringify(current)) {
+                return [previous, current];
+            }
+            return [];
+        };
+
+        const expectedResult = [[{ a: 1 }, { a: 1, b: 2 }], [{ a: 1, b: 2 }, { a: 3, b: 2 }]];
+        const result = [];
+
+        const obs = from([
+            { a: 1 },
+            { a: 1, b: 2 },
+            { a: 3, b: 2 },
+            { a: 3, b: 2 }
+        ])
+            .pipe(distinctDictValues(ownCompare))
+            .subscribe(c => {
+                result.push(c);
+            });
+
+        obs.unsubscribe();
+        Assert.equal(expectedResult, result);
+    });
+});
