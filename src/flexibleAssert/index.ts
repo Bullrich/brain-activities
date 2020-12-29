@@ -79,12 +79,12 @@ export default class Assert {
             if (errorParameter instanceof Array) {
                 return new AssertionFailed(errorParameter[0], errorParameter[1]);
             }
-            if(errorParameter instanceof Function){
+            if (errorParameter instanceof Function) {
                 const error = errorParameter();
-                if(error instanceof Error){
+                if (error instanceof Error) {
                     throw error;
                 } else {
-                    console.error("Object is not of type error", error);
+                    console.error('Object is not of type error', error);
                 }
             }
         }

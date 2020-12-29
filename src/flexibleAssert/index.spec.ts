@@ -32,12 +32,14 @@ describe('Test executes', () => {
 
             it('Should throw given error', () => {
                 const throwErr = new Error('Invalid message');
+                let error: Error = null;
                 try {
                     Assert.ok(null, throwErr);
                     expect.fail('Should fail before');
                 } catch (e) {
-                    expect(e).to.be.equal(throwErr);
+                    error = e;
                 }
+                expect(error).to.be.equal(throwErr);
             });
 
             it('Should provide details from tuple', () => {
@@ -45,6 +47,33 @@ describe('Test executes', () => {
                 const error = returnError(() => Assert.ok(null, errorData));
                 expect(error.message).to.be.equal(errorData[0]);
                 expect(error.details).to.be.equal(errorData[1]);
+            });
+
+            it('Should throw error from factory', () => {
+                const throwErr = new Error('Invalid message');
+                let error: Error = null;
+                try {
+                    Assert.ok(null, () => throwErr);
+                    expect.fail('Should fail before');
+                } catch (e) {
+                    error = e;
+                }
+                expect(error).to.be.equal(throwErr);
+            });
+
+
+            it('Should have error caused from factory', () => {
+                const throwErr = new Error('This error was thrown');
+                let error: Error = null;
+                try {
+                    Assert.ok(null, () => {
+                        throw throwErr;
+                    });
+                    expect.fail('Should fail before');
+                } catch (e) {
+                    error = e;
+                }
+                expect(error).to.be.equal(throwErr);
             });
         });
 
@@ -148,12 +177,14 @@ describe('Test executes', () => {
 
             it('Should throw given error', () => {
                 const throwErr = new Error('Invalid message');
+                let error: Error = null;
                 try {
                     Assert.equal(null, 2, throwErr);
                     expect.fail('Should fail before');
                 } catch (e) {
-                    expect(e).to.be.equal(throwErr);
+                    error = e;
                 }
+                expect(error).to.be.equal(throwErr);
             });
 
             it('Should provide details from tuple', () => {
@@ -161,6 +192,32 @@ describe('Test executes', () => {
                 const error = returnError(() => Assert.equal(2, 6, errorData));
                 expect(error.message).to.be.equal(errorData[0]);
                 expect(error.details).to.be.equal(errorData[1]);
+            });
+
+            it('Should throw error from factory', () => {
+                const throwErr = new Error('Invalid message');
+                let error: Error = null;
+                try {
+                    Assert.equal(null, 2, () => throwErr);
+                    expect.fail('Should fail before');
+                } catch (e) {
+                    error = e;
+                }
+                expect(error).to.be.equal(throwErr);
+            });
+
+            it('Should have error caused from factory', () => {
+                const throwErr = new Error('This error has been thrown');
+                let error: Error = null;
+                try {
+                    Assert.equal(null, 2, () => {
+                        throw throwErr;
+                    });
+                    expect.fail('Should fail before');
+                } catch (e) {
+                    error = e;
+                }
+                expect(error).to.be.equal(throwErr);
             });
         });
     });
