@@ -7,16 +7,53 @@ export class AssertionFailed extends Error {
     }
 }
 
+/**
+ * Class which contains the logic to do assertion on objects or pairs.
+ */
 export default class Assert {
-    public static assertEqual<T extends AssertTypeError>(actual: any, expected: any, errorParameter?: T): void {
-        if (actual !== expected) {
-            throw this.generateError(errorParameter);
-        } else if (!deepCompare(actual, expected)) {
-            throw this.generateError(errorParameter);
+    /**
+     * Lossy equal comparison
+     * In the case of primitives, it fails only if the values differ (1 is equal to "1")
+     * In the case of objects, it does a deep comparison
+     * @param actual - Current value
+     * @param expected - Expected value
+     * @param errorParameter - Optional custom error or message to have on fail
+     */
+    public static equal(actual: any, expected: any, errorParameter?: AssertTypeError): void {
+        if (typeof actual === 'object' && deepCompare(actual, expected)) {
+            return;
+        } else if (actual == expected) {
+            return;
         }
+
+        throw this.generateError(errorParameter);
     }
 
-    public static ok<T extends AssertTypeError>(value: any, errorParameter?: T): void {
+
+    /**
+     * Strict equal comparison.
+     * In the case of primitives, it fails if the type or value differs (1 is not equal to "1")
+     * In the case of objects it fails if the reference is not the same
+     * @param actual - Current value
+     * @param expected - Expected value
+     * @param errorParameter - Optional custom error or message to have on fail
+     */
+    public static strictEqual(actual: any, expected: any, errorParameter?: AssertTypeError): void {
+       if (actual === expected) {
+            return;
+        }
+
+        throw this.generateError(errorParameter);
+    }
+
+    /**
+     * Verifies that a value is valid
+     *
+     * Failure condition happens with null and undefined value, numbers which are equal or lower to 0, empty string and false parameters
+     * @param value - The parameter to evaluate
+     * @param errorParameter - Optional custom error or message to show on fail
+     */
+    public static ok(value: any, errorParameter?: AssertTypeError): void {
         const valueType = typeof value;
         if (valueType === 'number' || valueType === 'string' || valueType === 'boolean') {
             if (this.isBasicValueOk(value)) {
@@ -30,7 +67,7 @@ export default class Assert {
         throw this.generateError(errorParameter);
     }
 
-    private static generateError<T extends AssertTypeError>(errorParameter?: T): Error {
+    private static generateError(errorParameter?: AssertTypeError): Error {
         if (errorParameter) {
             if (errorParameter instanceof Error) {
                 return errorParameter;
@@ -46,13 +83,13 @@ export default class Assert {
     }
 
     private static isBasicValueOk(value: any): boolean {
-        if (typeof value === "number") {
+        if (typeof value === 'number') {
             return value > 0;
         }
-        if (typeof value === "string") {
+        if (typeof value === 'string') {
             return value.length > 0;
         }
-        if (typeof value === "boolean") {
+        if (typeof value === 'boolean') {
             return value === true;
         }
 
