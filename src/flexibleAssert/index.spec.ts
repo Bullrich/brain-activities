@@ -4,15 +4,19 @@ import { expect } from 'chai';
 describe('Test executes', () => {
 
     const returnError = (assertion: Function): AssertionFailed => {
+        let error: Error;
         try {
             assertion();
+            error = new Error('Assert never failed');
         } catch (e) {
             if (e instanceof AssertionFailed) {
                 return e;
             }
+            error = new Error('Error was not of type AssertionFailed');
         }
-        throw new Error('Invalid type');
+        throw error;
     };
+
 
     describe('Ok evaluation', () => {
         describe('Evaluation of error parameters', () => {
@@ -66,6 +70,62 @@ describe('Test executes', () => {
             });
         });
 
+    });
+
+    describe('Equals evaluation', () => {
+        describe('Evaluation of assertion', () => {
+            it('Should work with numbers', () => {
+                Assert.equal(1, 1);
+                const error = returnError(() => Assert.equal(0, 3));
+                expect(error).to.not.be.null;
+            });
+
+            it('Should work with string', () => {
+                Assert.equal('random message', 'random message');
+                const error = returnError(() => Assert.equal('rando', 'random'));
+                expect(error).to.not.be.null;
+            });
+
+            it('Should fail with wrong types', () => {
+                const error = returnError(() => Assert.strictEqual('0', 0));
+                expect(error).to.not.be.null;
+            });
+
+            it('Should work on equal arrays', () => {
+                const array1 = [1, 2, 3];
+                const array2 = [1, 2, 3];
+                Assert.equal(array1, array2);
+                const error = returnError(() => Assert.strictEqual(array1, array2));
+                expect(error).to.not.be.null;
+            });
+
+            it('Should fail on distinct arrays', () => {
+                const array1 = [1, 2, 3];
+                const array2 = [3, 2, 1];
+                const error = returnError(() => Assert.equal(array1, array2));
+                expect(error).to.not.be.null;
+                const strictError = returnError(() => Assert.equal(array1, array2));
+                expect(strictError).to.not.be.null;
+            });
+
+
+            it('Should work on equal objects', () => {
+                const obj1 = { name: 'John', age: 12 };
+                const obj2 = { name: 'John', age: 12 };
+                Assert.equal(obj1, obj2);
+                const error = returnError(() => Assert.strictEqual(obj1, obj2));
+                expect(error).to.not.be.null;
+            });
+
+            it('Should fail on distinct objects', () => {
+                const obj1 = { name: 'John', age: 12 };
+                const obj2 = { name: 'Javier', age: 27 };
+                const error = returnError(() => Assert.equal(obj1, obj2));
+                expect(error).to.not.be.null;
+                const strictError = returnError(() => Assert.equal(obj1, obj2));
+                expect(strictError).to.not.be.null;
+            });
+        });
     });
 });
 
