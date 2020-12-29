@@ -2,7 +2,6 @@ import Assert, { AssertionFailed } from './index';
 import { expect } from 'chai';
 
 describe('Test executes', () => {
-
     const returnError = (assertion: Function): AssertionFailed => {
         let error: Error;
         try {
@@ -124,6 +123,44 @@ describe('Test executes', () => {
                 expect(error).to.not.be.null;
                 const strictError = returnError(() => Assert.equal(obj1, obj2));
                 expect(strictError).to.not.be.null;
+            });
+
+            it('Should fail on object and null', () => {
+                const obj1 = { name: 'John', age: 12 };
+                const error = returnError(() => Assert.equal(obj1, null));
+                expect(error).to.not.be.null;
+                const strictError = returnError(() => Assert.equal(obj1, null));
+                expect(strictError).to.not.be.null;
+            });
+        });
+
+        describe('Evaluation of error parameters', () => {
+            it('Should return undefined data on lack of error parameters', () => {
+                const error = returnError(() => Assert.equal(null, 2));
+                expect(error.details).to.be.undefined;
+            });
+
+            it('Should return string message', () => {
+                const errorMsg = 'Object is null';
+                const error = returnError(() => Assert.equal(null, 2, errorMsg));
+                expect(error.message).to.be.equal(errorMsg);
+            });
+
+            it('Should throw given error', () => {
+                const throwErr = new Error('Invalid message');
+                try {
+                    Assert.equal(null, 2, throwErr);
+                    expect.fail('Should fail before');
+                } catch (e) {
+                    expect(e).to.be.equal(throwErr);
+                }
+            });
+
+            it('Should provide details from tuple', () => {
+                const errorData: [string, string] = ['This is the error', 'This is the detail'];
+                const error = returnError(() => Assert.equal(2, 6, errorData));
+                expect(error.message).to.be.equal(errorData[0]);
+                expect(error.details).to.be.equal(errorData[1]);
             });
         });
     });
