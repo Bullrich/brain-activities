@@ -1,5 +1,16 @@
-import { Action, AnyAction, CombinedState, Reducer, ReducersMapObject } from 'redux';
+import { Action } from "redux";
 
-export const partialCombineReducers = <S, A extends Action = AnyAction>(reducers: ReducersMapObject<S, A>)  : Reducer<CombinedState<S>, A> => {
-    throw new Error('Not implemented!');
-};
+type reducer<S> = ((stateSlice: S, action: Action) => S);
+type nonStrictedObject = { [key: string]: any };
+
+export function partialCombineReducers<A, B = undefined, C = undefined>(reducer: { [key: string]: reducer<A | B | C> }): (payload: nonStrictedObject, action: Action) => nonStrictedObject {
+    return (payload: nonStrictedObject, action: Action): nonStrictedObject => {
+        const newPayload = { ...payload };
+        for (const key in payload) {
+            if (reducer.hasOwnProperty(key)) {
+                newPayload[key] = reducer[key](payload[key], action);
+            }
+        }
+        return newPayload;
+    };
+}
