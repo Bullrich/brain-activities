@@ -1,4 +1,4 @@
-type AssertTypeError = string | Error | [string, string] | Function
+type AssertTypeError = string | Error | [string, string] | (() => Error)
 
 /**
  * Assertion error class which can have extra details
@@ -22,7 +22,7 @@ export default class Assert {
      * @param errorParameter - Optional custom error or message to have on fail
      */
     public static equal(actual: any, expected: any, errorParameter?: AssertTypeError): void {
-        if (typeof actual === 'object' && typeof expected === 'object' && deepCompare(actual, expected)) {
+        if (bothValuesAreObjects(actual, expected) && deepCompare(actual, expected)) {
             return;
         } else if (actual == expected) {
             return;
@@ -117,24 +117,34 @@ const deepCompare = function(obj1: any, obj2: any): boolean {
 
     // deep comparison for both classes
     // source: https://stackoverflow.com/a/201265/4330018
-    for (const i in obj1) {
-        if (obj1.hasOwnProperty(i)) {
-            if (!obj2.hasOwnProperty(i)) {
+    if (!deepCompareToObject(obj1, obj2)) {
+        return false;
+    }
+
+    if (!deepCompareToObject(obj2, obj1)) {
+        return false;
+    }
+    return true;
+};
+
+const deepCompareToObject = (main: any, comparing: any): boolean => {
+    for (const i in main) {
+        if (main.hasOwnProperty(i)) {
+            if (!comparing.hasOwnProperty(i)) {
                 return false;
-            } else if (obj1[i] != obj2[i]) {
+            } else if (bothValuesAreObjects(main[i], comparing[i])) {
+                if (!deepCompare(main[i], comparing[i])) {
+                    return false;
+                }
+            } else if (main[i] != comparing[i]) {
                 return false;
             }
         }
     }
 
-    for (const j in obj2) {
-        if (obj2.hasOwnProperty(j)) {
-            if (!obj1.hasOwnProperty(j)) {
-                return false;
-            } else if (obj1[j] != obj2[j]) {
-                return false;
-            }
-        }
-    }
     return true;
+};
+
+const bothValuesAreObjects = (val1: any, val2: any): boolean => {
+    return typeof val1 === 'object' && typeof val2 === 'object';
 };
