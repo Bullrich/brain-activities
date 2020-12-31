@@ -28,7 +28,7 @@ export default class Assert {
             return;
         }
 
-        throw this.generateError(errorParameter);
+        throw this.generateError(errorParameter, `Expected '${expected}' but received '${actual}'`);
     }
 
     /**
@@ -44,7 +44,7 @@ export default class Assert {
             return;
         }
 
-        throw this.generateError(errorParameter);
+        throw this.generateError(errorParameter, `Expected '${expected}' but received '${actual}'`);
     }
 
     /**
@@ -68,7 +68,7 @@ export default class Assert {
         throw this.generateError(errorParameter);
     }
 
-    private static generateError(errorParameter?: AssertTypeError): Error {
+    private static generateError(errorParameter?: AssertTypeError, message?:string): Error {
         if (errorParameter) {
             if (errorParameter instanceof Error) {
                 return errorParameter;
@@ -88,7 +88,7 @@ export default class Assert {
                 }
             }
         }
-        return new AssertionFailed();
+        return new AssertionFailed(message);
     }
 
     private static isBasicValueOk(value: any): boolean {
