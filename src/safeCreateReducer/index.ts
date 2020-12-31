@@ -13,7 +13,7 @@ type handleActions<P = undefined, T extends string = string> = actionFn<P, T> | 
  *
  */
 export function createAction<Payload, ActionType extends string = string>(type: ActionType): actionFn<Payload, ActionType> {
-    return function(payload?: Payload) {
+    return function(payload?: Payload): ActionData<Payload, ActionType> {
         return { type, payload };
     };
 }
