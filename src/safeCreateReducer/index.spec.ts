@@ -23,6 +23,7 @@ describe('Safe create reducer', () => {
                 case 'duplicate':
                     return state * 2;
             }
+            return state;
         }));
 
         Assert.equal(reducer(undefined, increment()), 2);

@@ -82,7 +82,7 @@ export default class Assert {
             if (errorParameter instanceof Function) {
                 const error = errorParameter();
                 if (error instanceof Error) {
-                    throw error;
+                    return error;
                 } else {
                     console.error('Object is not of type error', error);
                 }

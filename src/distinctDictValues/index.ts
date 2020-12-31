@@ -1,12 +1,12 @@
-import { Observable } from 'rxjs';
+import { Observable } from "rxjs";
 
 // reference: https://netbasal.com/creating-custom-operators-in-rxjs-32f052d69457
 
 const getDifferingElements = <T>(obj1: T | undefined, obj2: T, compareFn: compareTypeFn): T[] => {
-    let newObj: any[] = [];
+    const newObj: any[] = [];
     // if the first object is null (for the first loop)
     if (!obj1) {
-        for (let keys in obj2) {
+        for (const keys in obj2) {
             newObj.push(keys);
             newObj.push(obj2[keys]);
             const value: any[] = [keys, obj2[keys]];
@@ -17,7 +17,7 @@ const getDifferingElements = <T>(obj1: T | undefined, obj2: T, compareFn: compar
         const differingValues = [];
 
         // get all the distinct keys inside a tuple
-        for (let keys in obj2) {
+        for (const keys in obj2) {
             if (compareFn(obj1[keys], obj2[keys])) {
                 const difference = [keys, obj2[keys]];
                 differingValues.push(difference);
@@ -39,6 +39,10 @@ const defaultCompareValues = (prev: any, current: any): boolean => {
 
 type compareTypeFn = <K>(previous: K | undefined, current: K) => boolean;
 
+/**
+ * Returns an observables of tuples of distinct values in a dictionary comparing each key to the previous one
+ * @param compareFn - Overriding for the comparing functions of the values of the dictionary
+ */
 export default function distinctDictValues<T>(compareFn?: compareTypeFn): (source: Observable<T>) => Observable<T[]> {
     return function <T>(source: Observable<T>): Observable<T[]> {
         return new Observable<T[]>(subscriber => {
@@ -64,7 +68,7 @@ export default function distinctDictValues<T>(compareFn?: compareTypeFn): (sourc
             });
 
             // unsubscribe to stop a memory leak
-            return () => subscription.unsubscribe();
+            return (): void => subscription.unsubscribe();
         });
     };
 }
